@@ -6,32 +6,30 @@ import { gql, useMutation} from '@apollo/client';
 import { useRouter } from 'next/router';
 
 const NUEVO_CLIENTE = gql`
-        mutation nuevoCliente($input: ClienteInput){
-            nuevoCliente(input: $input){
-                nombre
-                apellido
-                empresa
-                email
-                telefono
-            }
-        }
-
+        mutation createClientResolver($input: ClientInput){
+            createClient(input: $input){
+                dni
+  	            nombre
+  	            apellido
+  	            direccion
+  	            correo
+             }
+         }
 `;
 
 const OBTENER_CLIENTES_USUARIO = gql `
-    query obtenerClienteVendedor{
-      obtenerClienteVendedor {
-        id
-        nombre
-        apellido
-        dni
-        empresa
-        email
-      }
-    }
+    query clientsUserResolver{
+    getClientsUser {
+    dni
+    nombre
+    apellido
+    correo
+    direccion
+  }
+}
 `
 
-const NuevoCliente =()=>{
+const NuevoCliente=()=>{
     //routing
     const router = useRouter();
     const [mensaje, guardarMensaje] = useState(null);
@@ -39,15 +37,15 @@ const NuevoCliente =()=>{
     // Mensaje de alerta
 
     // Mutation para crear nuevos clientes
-    const [nuevoCliente] = useMutation(NUEVO_CLIENTE, {
-        update(cache, { data:{ nuevoCliente}}){
+    const [createClient] = useMutation(NUEVO_CLIENTE, {
+        update(cache, { data:{ createClient}}){
             // Obtener el objeto de cache que se desea actualizar
-            const { obtenerClienteVendedor} = cache.readQuery({ query: OBTENER_CLIENTES_USUARIO });
+            const { getClientsUser} = cache.readQuery({ query: OBTENER_CLIENTES_USUARIO });
             // Reescribimos el cache ( el cache no se debe modificar, es recomendable reescribir)
             cache.writeQuery({
                 query: OBTENER_CLIENTES_USUARIO,
                 data :{
-                    obtenerClienteVendedor : [...obtenerClienteVendedor, nuevoCliente]
+                    getClientsUser : [...getClientsUser, createClient]
                 }
             })
         }
@@ -58,9 +56,8 @@ const NuevoCliente =()=>{
             nombre: '',
             apellido: '',
             dni:'',
-            empresa: '',
-            email: '',
-            telefono: ''
+            direccion: '',
+            correo: ''
         },
         validationSchema: Yup.object({
             nombre: Yup.string()
@@ -69,31 +66,30 @@ const NuevoCliente =()=>{
                        .required('El apellido del cliente es obligatorio!'),   
             dni: Yup.string()
                        .required('El dni del cliente es obligatorio!'),    
-            empresa: Yup.string()
-                       .required('El nombre de la empresa del cliente es obligatorio!'),  
-            email: Yup.string()
+            direccion: Yup.string()
+                       .required('El nombre de la direccion del cliente es obligatorio!'),  
+            correo: Yup.string()
                         .email('Email no válido!')
                        .required('El correo del cliente es obligatorio!'), 
         }),
         onSubmit: async (valores) =>{
-            const {nombre, apellido, dni, empresa, email, telefono} = valores;
+            const {nombre, apellido, dni, direccion, correo} = valores;
             try {
-                const { data }= await nuevoCliente({
+                const { data }= await createClient({
                     variables:{
                         input:{
                             nombre, 
                             apellido,
                             dni,
-                            empresa,
-                            email,
-                            telefono
+                            direccion,
+                            correo
                         }
                     }
                 });
 
                 router.push('/') // Redireccionar a dashboard clientes
 
-                //console.log(data.nuevoCliente);
+                //console.log(data.createClient);
                 
             } catch (error) {
                 guardarMensaje(error.message);
@@ -187,44 +183,44 @@ const NuevoCliente =()=>{
                     ) : null}
 
                     <div className="mb-4">
-                        <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="empresa">
-                            Empresa
+                        <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="direccion">
+                            Direccion
                         </label>
                             <input 
                             className="shadow apperance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:shadow-outline"
-                            id="empresa"
+                            id="direccion"
                             type="text"
-                            placeholder="Ingresar empresa"
+                            placeholder="Ingresar direccion"
                             onChange={formik.handleChange}
                             onBlur= {formik.handleBlur}
-                            value={formik.values.empresa}
+                            value={formik.values.direccion}
                             />
                     </div> 
-                    {formik.touched.empresa && formik.errors.empresa ? (
+                    {formik.touched.direccion && formik.errors.direccion ? (
                      <div className="my-2 bg-red-100 border-l-4 border-red-500 text-red-700 p-4">
                          <p className="font-bold">Error</p>
-                         <p>{formik.errors.empresa}</p>
+                         <p>{formik.errors.direccion}</p>
                     </div>
                     ) : null}
 
                     <div className="mb-4">
-                        <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="email">
+                        <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="correo">
                             Correo
                         </label>
                             <input 
                             className="shadow apperance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:shadow-outline"
-                            id="email"
-                            type="email"
+                            id="correo"
+                            type="correo"
                             placeholder="Ingresar correo"
                             onChange={formik.handleChange}
                             onBlur= {formik.handleBlur}
-                            value={formik.values.email}
+                            value={formik.values.correo}
                             />
                     </div> 
-                    {formik.touched.email && formik.errors.email ? (
+                    {formik.touched.correo && formik.errors.correo ? (
                      <div className="my-2 bg-red-100 border-l-4 border-red-500 text-red-700 p-4">
                          <p className="font-bold">Error</p>
-                         <p>{formik.errors.email}</p>
+                         <p>{formik.errors.correo}</p>
                     </div>
                     ) : null}
 
@@ -249,9 +245,6 @@ const NuevoCliente =()=>{
                         className="bg-gray-800 w-full mt-5 p-2 text-white uppercase font-bold hover:bg-gray-900"
                         value="Registrar Cliente"
                     />
-                    
-
- 
 
                     </form>
                 </div>

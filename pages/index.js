@@ -3,15 +3,14 @@ import {gql, useQuery} from '@apollo/client';
 import {useRouter} from 'next/router';
 import Link from 'next/link';
 
-const OBTENER_PARTNER = gql `
-    query getPartner{
-    partner{
-      id
-      name
-      website
-      email
-      parent_name
-
+const OBTENER_CLIENTE_VENDEDOR = gql `
+  query clientsUserResolver{
+    getClientsUser {
+    dni
+    nombre
+    apellido
+    correo
+    direccion
   }
 }
 `
@@ -21,15 +20,15 @@ const Index = () => {
   const router = useRouter();
 
   // Consulta de Apollo
-  const {data, loading, error } = useQuery(OBTENER_PARTNER);
+  const {data, loading, error } = useQuery(OBTENER_CLIENTE_VENDEDOR);
   
-  //console.log(data)
-  //console.log(loading)
-  //console.log(error)
+  console.info(data)
+  console.log(loading)
+  console.log(error)
   if(loading) return 'Cargando';
 
   // Si no hay información 
-  if(!data.partner){
+  if(!data.getClientsUser){
     //window.location.replace('/login');
     return router.push('/login')
 }
@@ -46,21 +45,21 @@ const Index = () => {
             <thead className="bg-gray-800">
               <tr className="text-white">
                 <th className="w-1/5 py-2">Nombre</th>
-                <th className="w-1/5 py-2">Email</th>
-                <th className="w-1/5 py-2">Website</th>
-                <th className="w-1/5 py-2">Empresa</th>
+                <th className="w-1/5 py-2">Correo</th>
+                <th className="w-1/5 py-2">DNI</th>
+                <th className="w-1/5 py-2">Dirección</th>
                 
               </tr>
             </thead>
             <tbody className="bg-white">
               
-            {data.partner.map(cliente =>(
+            {data.getClientsUser.map(cliente =>(
                 <tr key={cliente.id}>
 
-                  <td className="border px-4 py-2"> {cliente.name} </td>
-                  <td className="border px-4 py-2"> {cliente.email} </td>
-                  <td className="border px-4 py-2"> {cliente.website} </td>
-                  <td className="border px-4 py-2"> {cliente.parent_name} </td>
+                  <td className="border px-4 py-2"> {cliente.nombre} {cliente.apellido}</td>
+                  <td className="border px-4 py-2"> {cliente.correo} </td>
+                  <td className="border px-4 py-2"> {cliente.dni} </td>
+                  <td className="border px-4 py-2"> {cliente.direccion} </td>
                 </tr>
                  ))}
             </tbody>
