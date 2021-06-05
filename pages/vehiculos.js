@@ -17,8 +17,10 @@ const Vehiculos = () => {
 
   // Conusltar productos
   const { data, loading, error } = useQuery(OBTENER_VEHICULOS)
- 
-  if(loading) return 'cargando'
+
+  
+
+  if (loading) return 'cargando'
   return (
     <div>
       <Layout>
@@ -40,9 +42,9 @@ const Vehiculos = () => {
           <tbody className="bg-white">
 
             {data.getCar.map(car => (
-              <Vehiculo key={car.id} 
-              car={car}/>
-            ))}  
+              <Vehiculo key={car.id}
+                car={car} />
+            ))}
           </tbody>
 
         </table>
