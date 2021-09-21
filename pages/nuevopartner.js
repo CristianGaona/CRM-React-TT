@@ -5,31 +5,27 @@ import * as Yup from 'yup';
 import { gql, useMutation} from '@apollo/client';
 import { useRouter } from 'next/router';
 
-const NUEVO_CLIENTE = gql`
-        mutation createClientResolver($input: ClientInput){
-            createClient(input: $input){
-                dni
-  	            nombre
-  	            apellido
-  	            direccion
-  	            correo
-             }
-         }
+const NUEVO_PARTNER = gql`
+    mutation createPartnerResolver($input: PartnerInput){
+        createPartner(input: $input)
+    }
 `;
 
-const OBTENER_CLIENTES_USUARIO = gql `
-    query clientsUserResolver{
-    getClientsUser {
-    dni
-    nombre
-    apellido
-    correo
-    direccion
+const OBTENER_PARTNER = gql `
+  query getPartner{
+    partner{
+      id
+      name
+      city
+      email
+      phone
+      street
+      parent_name
   }
 }
 `
 
-const NuevoCliente=()=>{
+const NuevoPartner=()=>{
     //routing
     const router = useRouter();
     const [mensaje, guardarMensaje] = useState(null);
@@ -37,15 +33,15 @@ const NuevoCliente=()=>{
     // Mensaje de alerta
 
     // Mutation para crear nuevos clientes
-    const [createClient] = useMutation(NUEVO_CLIENTE, {
-        update(cache, { data:{ createClient}}){
+    const [ createPartner ] = useMutation(NUEVO_PARTNER, {
+        update(cache, { data:{ createPartner }}){
             // Obtener el objeto de cache que se desea actualizar
-            const { getClientsUser} = cache.readQuery({ query: OBTENER_CLIENTES_USUARIO });
+            const { partner } = cache.readQuery({ query: OBTENER_PARTNER });
             // Reescribimos el cache ( el cache no se debe modificar, es recomendable reescribir)
             cache.writeQuery({
-                query: OBTENER_CLIENTES_USUARIO,
+                query: OBTENER_PARTNER,
                 data :{
-                    getClientsUser : [...getClientsUser, createClient]
+                    partner : [...partner, createPartner]
                 }
             })
         }
@@ -53,41 +49,41 @@ const NuevoCliente=()=>{
 
     const formik = useFormik({
         initialValues: {
-            nombre: '',
-            apellido: '',
-            dni:'',
-            direccion: '',
-            correo: ''
+            name: '',
+            website: '',
+            phone:'',
+            street: '',
+            email: ''
         },
         validationSchema: Yup.object({
-            nombre: Yup.string()
-                       .required('El nombre del cliente es obligatorio!'),
-            apellido: Yup.string()
-                       .required('El apellido del cliente es obligatorio!'),   
-            dni: Yup.string()
-                       .required('El dni del cliente es obligatorio!'),    
-            direccion: Yup.string()
-                       .required('El nombre de la direccion del cliente es obligatorio!'),  
-            correo: Yup.string()
+            name: Yup.string()
+                       .required('El nombre del partner es obligatorio!'),
+            website: Yup.string()
+                       .required('El sitio web es obligatorio!'),   
+            phone: Yup.string()
+                       .required('El telefóno es obligatorio!'),    
+            street: Yup.string()
+                       .required('la direccion es obligatorio!'),  
+            email: Yup.string()
                         .email('Email no válido!')
-                       .required('El correo del cliente es obligatorio!'), 
+                       .required('El correo es obligatorio!'), 
         }),
         onSubmit: async (valores) =>{
-            const {nombre, apellido, dni, direccion, correo} = valores;
+            const {name, website, phone, street, email} = valores;
             try {
-                const { data }= await createClient({
+                const { data }= await createPartner({
                     variables:{
                         input:{
-                            nombre, 
-                            apellido,
-                            dni,
-                            direccion,
-                            correo
+                            name, 
+                            website, 
+                            phone, 
+                            street, 
+                            email
                         }
                     }
                 });
 
-                router.push('/') // Redireccionar a dashboard clientes
+                router.push('/partners') // Redireccionar a dashboard clientes
 
                 //console.log(data.createClient);
                 
@@ -112,115 +108,115 @@ const NuevoCliente=()=>{
 
     return(
         <Layout>
-            <h1 className="text-2xl text-gray-800 font-light">Nuevo Cliente</h1>
+            <h1 className="text-2xl text-gray-800 font-light">Nuevo Partner</h1>
             
             <div className="flex justify-center mt-5">
                 <div className="w-full max-w-lg">
                     <form className="bg-white sahdow-md px-8 pt-6 pb-8 mb-4"
                           onSubmit={formik.handleSubmit}>
                     <div className="mb-4">
-                        <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="nombre">
+                        <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="name">
                             Nombre
                         </label>
                             <input 
                             className="shadow apperance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:shadow-outline"
-                            id="nombre"
+                            id="name"
                             type="text"
                             placeholder="Ingresar nombre"
                             onChange={formik.handleChange}
                             onBlur= {formik.handleBlur}
-                            value={formik.values.nombre}
+                            value={formik.values.name}
                             />
                     </div> 
 
-                    {formik.touched.nombre && formik.errors.nombre ? (
+                    {formik.touched.name && formik.errors.name ? (
                      <div className="my-2 bg-red-100 border-l-4 border-red-500 text-red-700 p-4">
                          <p className="font-bold">Error</p>
-                         <p>{formik.errors.nombre}</p>
+                         <p>{formik.errors.name}</p>
                     </div>
                     ) : null}
 
                     <div className="mb-4">
-                        <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="apellido">
-                            Apellido
+                        <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="website">
+                            Sitio web
                         </label>
                             <input 
                             className="shadow apperance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:shadow-outline"
-                            id="apellido"
+                            id="website"
                             type="text"
-                            placeholder="Ingresar apellido"
+                            placeholder="Ingresar sitio web"
                             onChange={formik.handleChange}
                             onBlur= {formik.handleBlur}
-                            value={formik.values.apellido}
+                            value={formik.values.website}
                             />
                     </div> 
-                    {formik.touched.apellido && formik.errors.apellido ? (
+                    {formik.touched.website && formik.errors.website ? (
                      <div className="my-2 bg-red-100 border-l-4 border-red-500 text-red-700 p-4">
                          <p className="font-bold">Error</p>
-                         <p>{formik.errors.apellido}</p>
+                         <p>{formik.errors.website}</p>
                     </div>
                     ) : null}
 
                     <div className="mb-4">
-                        <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="dni">
+                        <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="phone">
                             DNI
                         </label>
                             <input 
                             className="shadow apperance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:shadow-outline"
-                            id="dni"
+                            id="phone"
                             type="text"
-                            placeholder="Ingresar dni"
+                            placeholder="Ingresar telefóno"
                             onChange={formik.handleChange}
                             onBlur= {formik.handleBlur}
-                            value={formik.values.dni}
+                            value={formik.values.phone}
                             />
                     </div> 
-                    {formik.touched.dni && formik.errors.dni ? (
+                    {formik.touched.phone && formik.errors.phone ? (
                      <div className="my-2 bg-red-100 border-l-4 border-red-500 text-red-700 p-4">
                          <p className="font-bold">Error</p>
-                         <p>{formik.errors.dni}</p>
+                         <p>{formik.errors.phone}</p>
                     </div>
                     ) : null}
 
                     <div className="mb-4">
-                        <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="direccion">
+                        <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="street">
                             Direccion
                         </label>
                             <input 
                             className="shadow apperance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:shadow-outline"
-                            id="direccion"
+                            id="street"
                             type="text"
                             placeholder="Ingresar direccion"
                             onChange={formik.handleChange}
                             onBlur= {formik.handleBlur}
-                            value={formik.values.direccion}
+                            value={formik.values.street}
                             />
                     </div> 
-                    {formik.touched.direccion && formik.errors.direccion ? (
+                    {formik.touched.direccion && formik.errors.street ? (
                      <div className="my-2 bg-red-100 border-l-4 border-red-500 text-red-700 p-4">
                          <p className="font-bold">Error</p>
-                         <p>{formik.errors.direccion}</p>
+                         <p>{formik.errors.street}</p>
                     </div>
                     ) : null}
 
                     <div className="mb-4">
-                        <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="correo">
+                        <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="email">
                             Correo
                         </label>
                             <input 
                             className="shadow apperance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:shadow-outline"
-                            id="correo"
-                            type="correo"
-                            placeholder="Ingresar correo"
+                            id="email"
+                            type="email"
+                            placeholder="Ingresar email"
                             onChange={formik.handleChange}
                             onBlur= {formik.handleBlur}
-                            value={formik.values.correo}
+                            value={formik.values.email}
                             />
                     </div> 
-                    {formik.touched.correo && formik.errors.correo ? (
+                    {formik.touched.email && formik.errors.email ? (
                      <div className="my-2 bg-red-100 border-l-4 border-red-500 text-red-700 p-4">
                          <p className="font-bold">Error</p>
-                         <p>{formik.errors.correo}</p>
+                         <p>{formik.errors.email}</p>
                     </div>
                     ) : null}
 
@@ -243,7 +239,7 @@ const NuevoCliente=()=>{
                     <input
                         type="submit"
                         className="bg-gray-800 w-full mt-5 p-2 text-white uppercase font-bold hover:bg-gray-900"
-                        value="Registrar Cliente"
+                        value="Registrar Partner"
                     />
 
                     </form>
@@ -254,4 +250,4 @@ const NuevoCliente=()=>{
     );
 }
 
-export default NuevoCliente;
+export default NuevoPartner;
